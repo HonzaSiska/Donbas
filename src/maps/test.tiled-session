@@ -1,0 +1,56 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "b5.tsx",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "Decor_Tile_B_03.tsx": {
+            "scaleInEditor": 1
+        },
+        "b4.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "b5.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "battlefield.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "battlefield2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "bf3.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/siska/Downloads/craftpix-566611-free-battle-location-top-down-game-tileset-pack (1)/PNG/Blocks",
+    "map.height": 130,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 130,
+    "openFiles": [
+        "battlefield.tsx",
+        "battlefield2.tsx",
+        "bf3.tsx",
+        "b4.tsx",
+        "b5.tsx"
+    ],
+    "project": "test.tiled-project",
+    "recentFiles": [
+        "Decor_Tile_B_03.tsx",
+        "battlefield.tsx",
+        "battlefield2.tsx",
+        "bf3.tsx",
+        "b4.tsx",
+        "b5.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}
