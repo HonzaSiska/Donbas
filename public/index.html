@@ -14,6 +14,11 @@
 
 
     }
+    #switch{
+        position: absolute;
+        left: 20px;
+        top: 20px;
+    }
     #pointer{
         width: 40px;
         height: 40px;
@@ -32,6 +37,10 @@
       }</style>
 </head>
 <body>
+    <!-- <audio  autoplay>
+        <source src="/draconus.mp3" type="audio/mp3" >
+    </audio> -->
+    <button id="switch">Music Off</button>
     <!-- <img id='pointer' src="pointer.png" alt="" > -->
     <canvas id="game"></canvas>
     <script src="/socket.io/socket.io.js"></script>

@@ -16,9 +16,42 @@ const TILE_SIZE = 32
 
 let myId = null
 
-
 // const pointerImage = new Image()
 // pointerImage.src = './pointer.png'
+
+
+
+
+// Tiltle music
+
+let musicPlaying = false
+const draconusAudio = new Audio()
+draconusAudio.src='./draconus.mp3'
+const switchButton = document.querySelector('#switch')
+
+switchButton.addEventListener('click', ()=> {   
+    if(musicPlaying === false){
+        draconusAudio.play()
+        switchButton.innerText = 'Music On'     
+        musicPlaying = !musicPlaying   
+    }else{
+        draconusAudio.pause()
+        switchButton.innerText = 'Music Off' 
+        musicPlaying = !musicPlaying
+    }
+
+    
+})
+
+// switchButton.click()
+
+
+
+
+
+
+
+
 
 
 
@@ -76,11 +109,14 @@ window.addEventListener('keyup', (e) => {
 
 ///SHOOTING
 window.addEventListener('click', (e) => {
-    
+   
     const currentPlayer = players.find(player => player.id === socket.id)
     if(currentPlayer.dead) return
+    cannonSound.playbackRate = 5
+    cannonSound.play()
+   
     // const angle = Math.atan2(e.clientY - canvas.height, e.clientX - canvas.width)
-        const angle = Math.atan2(e.clientY - canvas.height / 2 , e.clientX  - canvas.height / 2 )
+    const angle = Math.atan2(e.clientY - canvas.height / 2 , e.clientX  - canvas.height / 2 )
     
     socket.emit('shot', {
         angle
@@ -169,8 +205,8 @@ function loop() {
         ctx.arc(shot.x, shot.y, 3, 0, 2 * Math.PI)
         ctx.fill();
 
-        cannonSound.playbackRate = 5
-        cannonSound.play()
+        // cannonSound.playbackRate = 5
+        // cannonSound.play()
         
     }
 

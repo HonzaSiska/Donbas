@@ -3,7 +3,7 @@ const { createServer } = require('http')
 const express = require('express')
 const cors = require('cors')
 var tmx = require('tmx-parser')
-
+var path = require('path');
 const app = express()
 app.use(cors())
 const httpServer = createServer(app)
@@ -15,7 +15,13 @@ const SPEED = 5
 const SHOT_SPEED = 12
 const TILE_SIZE = 32
 
-
+app.set('trust proxy', 1)
+ app.use(express.static('public'))
+ app.use(express.urlencoded({extended: true}));
+app.get('/test', (req, res)=> {
+  
+    res.sendFile('/test.html')
+})
 
 
 const inputsMaps = {}
@@ -76,10 +82,11 @@ const tick = (delta) => {
     
 }
 
+
 async function main() {
 
-
-    app.use(express.static('public'))
+    
+    // app.use(express.static('public'))
 
 
     io.on('connect', (socket) => {
