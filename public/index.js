@@ -218,25 +218,25 @@ function loop() {
         if(player.lives < 5 && player.lives > 0 ) ctx.fillStyle = 'gray'
         if(player.lives < 1) ctx.fillStyle = 'red'
         ctx.fillText(player.lives, player.x -5, player.y + 5);
-        
-        
 
+        //CAN EXPLODE IF PLAYER HAS LIVES
         if(player.canExplode) {
-            explosion.playbackRate = 1
+            explosion.playbackRate = 8
             explosion.play()
             ctx.drawImage(smokeImage, player.x, player.y, 60, 60)
+
+            //MAKES SMOKE DISAPPEAR
             setTimeout(()=> {
                 socket.emit('disableExplosion', {
                     playerId: player.id
                 })
-            }, 500)
-            
-            if(player.dead ){
-                ctx.drawImage(fireImage, player.x, player.y, 40, 40)
-                
-            }
+            }, 500) 
         }
         
+        //WHEN PLAY HAS 0 LIVES, DRAW FIRE IMAGE
+        if(player.dead ){
+            ctx.drawImage(fireImage, player.x, player.y, 40, 40)
+        }
     }
     
     

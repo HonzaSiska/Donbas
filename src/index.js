@@ -29,6 +29,8 @@ let players = []
 let shots = []
 
 const tick = (delta) => {
+
+    
     
     for (const player of players) {
         const inputs = inputsMaps[player.id]
@@ -68,20 +70,28 @@ const tick = (delta) => {
                 // player.x = 10
                 // player.y = 10
                 shot.timeLeft = -1
-                player.canExplode = true
+
+                if(player.lives > 0) player.canExplode = true
+
                 if(!player.justHit && player.lives > 0) player.lives -= 1
-                if(players.lives < 1){
+
+                if(player.lives < 1){
                     player.dead = true
                 }
-
                 // TO MAKE SURE THE PLAYER DOESNT LOOSE MORE THAN 1 LIVE WHEN HIT WITH MULTIPLE SHOTS
                 player.justHit = true
                 setTimeout(()=> {
                     player.justHit = false
                 },2000)
-                console.log(players.lives)
-               
-                    
+
+
+                // ENABLES REMOVAL OF PLAYER
+                if(player.dead){
+                    setTimeout(() => {
+                        player.canBeRemoved = true
+                    }, 5000);
+                }
+   
                 break
             }
             
@@ -89,6 +99,12 @@ const tick = (delta) => {
         }
       
     }
+
+    // REMOVES DEAD PLAYER FROM THE GAME AFTER 5 SECS
+    const updatedPlayers = players.filter(player => player.canBeRemoved !== true)
+    if(updatedPlayers) players = updatedPlayers
+
+
     io.emit('players', players)
     io.emit('shots', shots)
     
@@ -109,17 +125,19 @@ async function main() {
             left: false,
             right: false
         }
-        players.push({
-            id: socket.id,
-            x: Math.floor(Math.random() * (400 - 200)) + 200,
-            y: Math.floor(Math.random() * (400 - 200)) + 200,
-            dead: false,
-            canExplode: false,
-            lives: 5,
-            justHit: false
 
-
-        })
+        if(players.length < 5){
+            players.push({
+                id: socket.id,
+                x: Math.floor(Math.random() * (400 - 200)) + 200,
+                y: Math.floor(Math.random() * (400 - 200)) + 200,
+                dead: false,
+                canExplode: false,
+                lives: 5,
+                justHit: false,
+                canBeRemoved: false
+                
+        })}
         socket.emit('map', {
 
         })
@@ -159,7 +177,6 @@ async function main() {
         })
         socket.on('disableExplosion', (hitPlayer)=> {
             const player = players.find(player => player.id === hitPlayer.playerId)
-            console.log('hit player', player)
             player.canExplode = false
         })
 
@@ -167,6 +184,7 @@ async function main() {
             players = players.filter(player => player.id != socket.id)
 
         })
+       
     })
 
     // IMPORTANT FOR LOCALTUNNEL TESTING
