@@ -19,6 +19,12 @@ let myId = null
 // const pointerImage = new Image()
 // pointerImage.src = './pointer.png'
 
+// LIVES
+
+// const allLiveTags = document.querySelectorAll('.live-wrapper')
+//         allLiveTags && allLiveTags.forEach(element => {
+//             document.querySelector('body').removeChild(element)
+//         });
 
 
 
@@ -27,7 +33,19 @@ let myId = null
 let musicPlaying = false
 const draconusAudio = new Audio()
 draconusAudio.src='./draconus.mp3'
+draconusAudio.setAttribute('autoplay', true)
 const switchButton = document.querySelector('#switch')
+
+window.addEventListener('resize', (e)=> {
+    // switchButton.innerText = window.innerWidth
+
+    if(canvas.width > window.innerWidth - 100) {
+        switchButton.style.opacity='0.4'
+    }else{
+        switchButton.style.opacity='1'
+    }
+})
+
 
 switchButton.addEventListener('click', ()=> {   
     if(musicPlaying === false){
@@ -44,14 +62,6 @@ switchButton.addEventListener('click', ()=> {
 })
 
 // switchButton.click()
-
-
-
-
-
-
-
-
 
 
 
@@ -79,6 +89,12 @@ const inputs = {
 
 const fireImage = new Image()
 fireImage.src ='/fire.png'
+
+// SMOKE
+
+const smokeImage = new Image()
+smokeImage.src ='/smoke.png'
+
 
 
 window.addEventListener('keydown', (e) => {
@@ -155,9 +171,10 @@ socket.on('shots', (serverShots) => {
 })
 
 
+
 function loop() {
 
-
+    
     // tankPosX < 100 ? tankPosX = tankPosX + Math.random() * 3  : tankPosX = 100
 
 
@@ -180,16 +197,43 @@ function loop() {
 
     // draw tank(player) on canvas
     for (const player of players) {
+       
         ctx.drawImage(tankImage, player.x, player.y, 40, 40)
-        if(player.dead) {
-            
-            ctx.drawImage(fireImage, player.x, player.y, 40, 40)
-            if(player.canExplode){
-                explosion.playbackRate = 1
-                explosion.play()
+        //LIVES
+
+        //circle
+        ctx.beginPath();
+        // ctx.lineWidth = "2";
+        if(player.lives === 5) ctx.strokeStyle = 'green'
+        if(player.lives < 5 && player.lives > 0 ) ctx.strokeStyle = 'gray'
+        if(player.lives < 1) ctx.strokeStyle = 'red'
+        ctx.fillStyle = 'white'
+        ctx.arc(player.x, player.y, 10 ,1, 2 * Math.PI)
+        ctx.fill();
+        ctx.stroke();
+
+        //text
+        ctx.font = "15px Arial";
+        if(player.lives === 5) ctx.fillStyle = 'green'
+        if(player.lives < 5 && player.lives > 0 ) ctx.fillStyle = 'gray'
+        if(player.lives < 1) ctx.fillStyle = 'red'
+        ctx.fillText(player.lives, player.x -5, player.y + 5);
+        
+        
+
+        if(player.canExplode) {
+            explosion.playbackRate = 1
+            explosion.play()
+            ctx.drawImage(smokeImage, player.x, player.y, 60, 60)
+            setTimeout(()=> {
                 socket.emit('disableExplosion', {
                     playerId: player.id
                 })
+            }, 500)
+            
+            if(player.dead ){
+                ctx.drawImage(fireImage, player.x, player.y, 40, 40)
+                
             }
         }
         

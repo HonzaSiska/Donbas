@@ -68,7 +68,19 @@ const tick = (delta) => {
                 // player.x = 10
                 // player.y = 10
                 shot.timeLeft = -1
-                player.dead = true 
+                player.canExplode = true
+                if(!player.justHit && player.lives > 0) player.lives -= 1
+                if(players.lives < 1){
+                    player.dead = true
+                }
+
+                // TO MAKE SURE THE PLAYER DOESNT LOOSE MORE THAN 1 LIVE WHEN HIT WITH MULTIPLE SHOTS
+                player.justHit = true
+                setTimeout(()=> {
+                    player.justHit = false
+                },2000)
+                console.log(players.lives)
+               
                     
                 break
             }
@@ -102,7 +114,10 @@ async function main() {
             x: Math.floor(Math.random() * (400 - 200)) + 200,
             y: Math.floor(Math.random() * (400 - 200)) + 200,
             dead: false,
-            canExplode: true,
+            canExplode: false,
+            lives: 5,
+            justHit: false
+
 
         })
         socket.emit('map', {
