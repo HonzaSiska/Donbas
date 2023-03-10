@@ -32,33 +32,38 @@ let myId = null
 
 let musicPlaying = false
 const draconusAudio = new Audio()
-draconusAudio.src='./draconus.mp3'
+draconusAudio.src = './draconus.mp3'
 draconusAudio.setAttribute('autoplay', true)
+draconusAudio.setAttribute('playsinline', true)
+draconusAudio.setAttribute('loop', true)
 const switchButton = document.querySelector('#switch')
 
-window.addEventListener('resize', (e)=> {
+
+
+
+window.addEventListener('resize', (e) => {
     // switchButton.innerText = window.innerWidth
 
-    if(canvas.width > window.innerWidth - 100) {
-        switchButton.style.opacity='0.4'
-    }else{
-        switchButton.style.opacity='1'
+    if (canvas.width > window.innerWidth - 100) {
+        switchButton.style.opacity = '0.4'
+    } else {
+        switchButton.style.opacity = '1'
     }
 })
 
 
-switchButton.addEventListener('click', ()=> {   
-    if(musicPlaying === false){
+switchButton.addEventListener('click', (e) => {
+    if (musicPlaying === false) {
         draconusAudio.play()
-        switchButton.innerText = 'Music On'     
-        musicPlaying = !musicPlaying   
-    }else{
+        switchButton.innerText = 'Music On'
+        musicPlaying = !musicPlaying
+    } else {
         draconusAudio.pause()
-        switchButton.innerText = 'Music Off' 
+        switchButton.innerText = 'Music Off'
         musicPlaying = !musicPlaying
     }
 
-    
+
 })
 
 // switchButton.click()
@@ -88,12 +93,12 @@ const inputs = {
 // FIRE
 
 const fireImage = new Image()
-fireImage.src ='/fire.png'
+fireImage.src = '/fire.png'
 
 // SMOKE
 
 const smokeImage = new Image()
-smokeImage.src ='/smoke.png'
+smokeImage.src = '/smoke.png'
 
 
 
@@ -125,19 +130,19 @@ window.addEventListener('keyup', (e) => {
 
 ///SHOOTING
 window.addEventListener('click', (e) => {
-   
+
     const currentPlayer = players.find(player => player.id === socket.id)
-    if(currentPlayer.dead) return
+    if (currentPlayer.dead) return
     cannonSound.playbackRate = 5
     cannonSound.play()
-   
+
     // const angle = Math.atan2(e.clientY - canvas.height, e.clientX - canvas.width)
-    const angle = Math.atan2(e.clientY - canvas.height / 2 , e.clientX  - canvas.height / 2 )
-    
+    const angle = Math.atan2(e.clientY - canvas.height / 2, e.clientX - canvas.height / 2)
+
     socket.emit('shot', {
         angle
     })
-    
+
 
 })
 
@@ -147,12 +152,12 @@ window.addEventListener('click', (e) => {
 // window.addEventListener('mousemove', (e)=> {
 //     pointer.style.left = e.clientX - pointer.width / 2 + 'px'
 //     pointer.style.top = e.clientY   - pointer.width / 2 + 'px'
-  
+
 // })
 
 
 
-const socket = io('ws://localhost:5000',{
+const socket = io('ws://localhost:5000', {
     transports: ['websocket', 'polling', 'flashsocket']
 })
 
@@ -165,7 +170,7 @@ socket.on('players', (serverPlayers) => {
 })
 
 socket.on('shots', (serverShots) => {
-    
+
     shots = serverShots
 
 })
@@ -174,7 +179,7 @@ socket.on('shots', (serverShots) => {
 
 function loop() {
 
-    
+
     // tankPosX < 100 ? tankPosX = tankPosX + Math.random() * 3  : tankPosX = 100
 
 
@@ -183,63 +188,68 @@ function loop() {
     // const myPlayer = players.find((player) => player.id === socket.id)
     // let cameraX = 0
     // let cameraY = 0
-    
+
     // if(myPlayer){
     //      cameraX = parseInt(myPlayer.x - canvas.width/2)
     //      cameraY  = parseInt(myPlayer.y - canvas.height/2)
     // }
 
 
-    
+
     tileMap.draw(canvas, ctx)
 
-    
+
 
     // draw tank(player) on canvas
     for (const player of players) {
-       
+
         ctx.drawImage(tankImage, player.x, player.y, 40, 40)
         //LIVES
 
         //circle
         ctx.beginPath();
         // ctx.lineWidth = "2";
-        if(player.lives === 5) ctx.strokeStyle = 'green'
-        if(player.lives < 5 && player.lives > 0 ) ctx.strokeStyle = 'gray'
-        if(player.lives < 1) ctx.strokeStyle = 'red'
+        if (player.lives === 5) ctx.strokeStyle = 'green'
+        if (player.lives < 5 && player.lives > 0) ctx.strokeStyle = 'gray'
+        if (player.lives < 1) ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
-        ctx.arc(player.x, player.y, 10 ,1, 2 * Math.PI)
+        ctx.arc(player.x, player.y, 10, 1, 2 * Math.PI)
         ctx.fill();
         ctx.stroke();
 
         //text
         ctx.font = "15px Arial";
-        if(player.lives === 5) ctx.fillStyle = 'green'
-        if(player.lives < 5 && player.lives > 0 ) ctx.fillStyle = 'gray'
-        if(player.lives < 1) ctx.fillStyle = 'red'
-        ctx.fillText(player.lives, player.x -5, player.y + 5);
+        if (player.lives === 5) ctx.fillStyle = 'green'
+        if (player.lives < 5 && player.lives > 0) ctx.fillStyle = 'gray'
+        if (player.lives < 1) ctx.fillStyle = 'red'
+        ctx.fillText(player.lives, player.x - 5, player.y + 5);
 
         //CAN EXPLODE IF PLAYER HAS LIVES
-        if(player.canExplode) {
+        if (player.canExplode) {
             explosion.playbackRate = 8
             explosion.play()
             ctx.drawImage(smokeImage, player.x, player.y, 60, 60)
 
             //MAKES SMOKE DISAPPEAR
-            setTimeout(()=> {
+            setTimeout(() => {
                 socket.emit('disableExplosion', {
                     playerId: player.id
                 })
-            }, 500) 
+            }, 500)
         }
-        
+
         //WHEN PLAY HAS 0 LIVES, DRAW FIRE IMAGE
-        if(player.dead ){
+        if (player.dead) {
             ctx.drawImage(fireImage, player.x, player.y, 40, 40)
+            if (!musicPlaying) {
+                draconusAudio.play()
+                switchButton.innerText = 'Music On'
+                musicPlaying = !musicPlaying
+            }
         }
     }
-    
-    
+
+
 
     for (const shot of shots) {
         ctx.beginPath();
@@ -251,7 +261,7 @@ function loop() {
 
         // cannonSound.playbackRate = 5
         // cannonSound.play()
-        
+
     }
 
 
