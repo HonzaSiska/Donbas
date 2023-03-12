@@ -18,7 +18,7 @@ const LIVE_REFILL_LIFE_TIME = 12
 
 
 app.set('trust proxy', 1)
-app.use(express.static('public'))
+app.use(express.static('../public'))
 app.use(express.urlencoded({ extended: true }));
 app.get('/test', (req, res) => {
 
