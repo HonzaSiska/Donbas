@@ -6,10 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
+
+    html{
+        margin: 0;
+        padding: 0;
+    }
     #game {
         
         /* cursor: url('pointer.png') , auto; */
         border: 1px solid rgb(214, 204, 191);
+        
 
     }
     #switch{
@@ -31,7 +37,7 @@
         top: 50%;
         right: 50%;
         position: absolute;
-        cursor: none;
+        /* cursor: none; */
         
     }
     body {
@@ -46,7 +52,7 @@
 <body>
     <button id="switch">Music Off</button>
     <!-- <div id="lives-wrapper"><span id="lives">Lives : 5</span></div> -->
-    <!-- <img id='pointer' src="pointer.png" alt="" > -->
+    <img id='pointer' src="pointer.png" alt="" >
     <canvas id="game"></canvas>
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/index.js"></script>

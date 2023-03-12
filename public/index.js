@@ -1,14 +1,12 @@
 import TileMap from './TileMap.js'
 
 
-
-
-
 const canvas = document.querySelector('#game')
 
 
 const cannonSound = new Audio('./cannon.mp3')
 const explosion = new Audio('./explosion.wav')
+
 
 
 const ctx = canvas.getContext('2d')
@@ -101,6 +99,15 @@ const smokeImage = new Image()
 smokeImage.src = '/smoke.png'
 
 
+// AIRPLANES
+
+let airplanes = []
+
+// LIVES
+ 
+let lives  = []
+const lifeImage = new Image()
+lifeImage.src = '/first-aid2.png'
 
 window.addEventListener('keydown', (e) => {
     e.preventDefault()
@@ -146,16 +153,15 @@ window.addEventListener('click', (e) => {
 
 })
 
-// const pointer = document.querySelector('#pointer') 
+//POINTER
 
+const pointer = document.querySelector('#pointer') 
 
-// window.addEventListener('mousemove', (e)=> {
-//     pointer.style.left = e.clientX - pointer.width / 2 + 'px'
-//     pointer.style.top = e.clientY   - pointer.width / 2 + 'px'
+window.addEventListener('mousemove', (e)=> {
+    pointer.style.left = e.clientX - pointer.width / 2 + 'px'
+    pointer.style.top = (e.clientY - pointer.width / 2)+ 50 + 'px'
 
-// })
-
-
+})
 
 const socket = io('ws://localhost:5000', {
     transports: ['websocket', 'polling', 'flashsocket']
@@ -174,6 +180,24 @@ socket.on('shots', (serverShots) => {
     shots = serverShots
 
 })
+
+socket.on('airplane', (serverPlanes) => {
+    airplanes = serverPlanes
+
+})
+
+socket.on('lives', (serverLives) => {
+    lives = serverLives
+
+})
+
+socket.on('pickup_sound', () => {
+    const pickupSound = new Audio('./pickup2.wav')
+    pickupSound.play()
+    
+})
+
+
 
 
 
@@ -200,11 +224,14 @@ function loop() {
 
 
 
+
     // draw tank(player) on canvas
     for (const player of players) {
 
         ctx.drawImage(tankImage, player.x, player.y, 40, 40)
         //LIVES
+
+
 
         //circle
         ctx.beginPath();
@@ -219,7 +246,7 @@ function loop() {
 
         //text
         ctx.font = "15px Arial";
-        if (player.lives === 5) ctx.fillStyle = 'green'
+        if (player.lives >= 5) ctx.fillStyle = 'green'
         if (player.lives < 5 && player.lives > 0) ctx.fillStyle = 'gray'
         if (player.lives < 1) ctx.fillStyle = 'red'
         ctx.fillText(player.lives, player.x - 5, player.y + 5);
@@ -264,6 +291,19 @@ function loop() {
 
     }
 
+    for (const plane of airplanes) {
+        const airplaneImage = new Image()
+        // CHOOSE FILE THAT CORRESPONDS TO THE DIRECTION OF FLIGHT
+        airplaneImage.src = plane.startSide === 'left' ? '/f22right.png' : '/f22left.png'
+        ctx.drawImage(airplaneImage, plane.x, plane.y, 65, 65)
+
+
+    }
+
+    for(const life of lives){
+        // alert(life.x)
+        ctx.drawImage(lifeImage, life.x, life.y,30, 30)
+    }
 
     window.requestAnimationFrame(loop)
 }

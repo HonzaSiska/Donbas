@@ -14,6 +14,7 @@ const TICK_RATE = 30
 const SPEED = 5
 const SHOT_SPEED = 8
 const TILE_SIZE = 32
+const LIVE_REFILL_LIFE_TIME = 12
 
 
 app.set('trust proxy', 1)
@@ -26,27 +27,31 @@ app.get('/test', (req, res) => {
 
 
 //GENERATE AIRPLANE THET DROPS LIVES, 
-const airplanes = []
+let airplanes = []
+let lives = []
 let planesEnabled = true
 
 const generateAirplane = () => {
-    const RANDOM_INTERVAL = Math.floor(Math.random() * (10000 - 3000)) + 3000
+    const RANDOM_INTERVAL = Math.floor(Math.random() * (30000 - 20000)) + 20000
     const startX = Math.random(1) > 0.5 ? 600 : 0
+    const startSide = startX === 600 ? 'right' : 'left'
     setTimeout(() => {
         const newPlane = {
             id: Math.random(10000),
             x: startX,
-            ExitX : Math.abs(startX - 600),
-            y: Math.floor(Math.random() * (500 - 100)) + 100,
-            dropOffX: Math.floor(Math.random() * (500 - 100)) + 100,
-            dropOffY: Math.floor(Math.random() * (500 - 100)) + 100,
+            startSide: startSide,
+            exitX: Math.abs(startX - 600),
+            y: Math.floor(Math.random() * (600 - 50)) + 50,
+            dropOffX: Math.floor(Math.random() * (550 - 100)) + 100,
+            dropOffY: Math.floor(Math.random() * (550 - 100)) + 100,
+            canDropOff: true
         }
         airplanes.push(newPlane)
-        console.log(airplanes)
+        // console.log(airplanes)
 
-        if(planesEnabled) generateAirplane()
-        
-        
+        if (planesEnabled) generateAirplane()
+
+
     }, RANDOM_INTERVAL);
 }
 
@@ -60,40 +65,54 @@ let shots = []
 
 const tick = (delta) => {
 
-    
-
     for (const player of players) {
         const inputs = inputsMaps[player.id]
         if (inputs.up) {
-            if(player.y < 1){
+            if (player.y < 1) {
                 player.y = 0
-            }else{
+            } else {
                 player.y -= SPEED
             }
-            
-            
+
+
         } else if (inputs.down) {
-            if(player.y > 599){
+            if (player.y > 599) {
                 player.y = 600
-            }else{
+            } else {
                 player.y += SPEED
             }
         }
 
         if (inputs.left) {
-            if(player.x < 1){
+            if (player.x < 1) {
                 player.x = 0
-            }else{
+            } else {
                 player.x -= SPEED
             }
-            
+
         } else if (inputs.right) {
-            if(player.x > 599){
+            if (player.x > 599) {
                 player.x = 600
-            }else{
+            } else {
                 player.x += SPEED
             }
-            
+
+        }
+
+
+        // PLAYER LIVES UPDATE
+
+        for(const life of lives){
+            const distance = Math.sqrt((player.x - life.x) ** 2 + (player.y - life.y) ** 2)
+            if(distance <= 20){
+
+                if(player.lives < 5) {
+                    const updatedLives = lives.filter(item => item.id !== life.id)
+                    lives = updatedLives
+                    player.lives += 1
+                    io.sockets.emit('pickup_sound')
+                }
+            }
         }
 
     }
@@ -141,22 +160,68 @@ const tick = (delta) => {
                         player.canBeRemoved = true
                     }, 5000);
                 }
-
                 break
+            }
+        }
+    }
+
+    // REMOVES DEAD PLAYER FROM THE GAME AFTER 5 SECS
+
+    const updatedPlayers = players.filter(player => player.canBeRemoved !== true)
+    if (updatedPlayers) players = updatedPlayers
+
+    //UPDATE PLANES POSITION 
+
+    if (airplanes.length > 0) {
+        for (const plane of airplanes) {
+            plane.startSide === 'left' ? plane.x += 5  : plane.x -= 5 
+
+            // REMOVE PLANES WHEN THEY GET OUT OF BOUNDS OF CANVAS
+
+            if (plane.startSide === 'left' && plane.x >= plane.exitX + 50) {
+                const updatedPlanes = airplanes.filter(airplane => airplane.id !== plane.id)
+                airplanes = updatedPlanes
+            }
+
+            if (plane.startSide === 'right' && plane.x <= plane.exitX - 50) {
+
+                const updatedPlanes = airplanes.filter(airplane => airplane.id !== plane.id)
+                airplanes = updatedPlanes
+            }
+
+            // DROP EXTRA LIVES
+
+            if(Math.abs(plane.x - plane.dropOffX) <= 5 && plane.canDropOff){
+                plane.canDropOff = false
+                const life = {
+                    id: Math.random() * 10000,
+                    x: plane.x,
+                    y: plane.y -10,
+
+                }
+                lives.push(life)
+                setTimeout(()=> {
+                    const updatedLives = lives.filter(item => item.id === life.id)
+                    
+                    lives = updatedLives
+
+                    
+                }, LIVE_REFILL_LIFE_TIME)
             }
 
 
         }
-
     }
 
-    // REMOVES DEAD PLAYER FROM THE GAME AFTER 5 SECS
-    const updatedPlayers = players.filter(player => player.canBeRemoved !== true)
-    if (updatedPlayers) players = updatedPlayers
+   
 
+    
+    //DISPATCH
 
+    io.emit('airplane', airplanes)
     io.emit('players', players)
     io.emit('shots', shots)
+    io.emit('lives', lives)
 
 }
 
@@ -185,8 +250,7 @@ async function main() {
                 canExplode: false,
                 lives: 5,
                 justHit: false,
-                canBeRemoved: false
-
+                canBeRemoved: false,
             })
         }
         socket.emit('map', {
