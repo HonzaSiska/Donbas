@@ -315,7 +315,7 @@ async function main() {
     });
 
 
-    httpServer.listen(5000,
+    httpServer.listen(process.env.PORT || 5000,
 
         () => {
             console.log('server is running')
