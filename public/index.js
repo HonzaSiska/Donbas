@@ -163,7 +163,7 @@ window.addEventListener('mousemove', (e)=> {
 
 })
 
-const socket = io('ws://donbas.onrender.com', {
+const socket = io('https://donbas.onrender.com', {
     transports: ['websocket', 'polling', 'flashsocket']
 })
 
