@@ -14,7 +14,7 @@ const TICK_RATE = 30
 const SPEED = 5
 const SHOT_SPEED = 8
 const TILE_SIZE = 32
-const LIVE_REFILL_LIFE_TIME = 12
+const LIVE_REFILL_LIFE_TIME = 10000
 
 
 app.set('trust proxy', 1)
@@ -26,7 +26,7 @@ app.get('/test', (req, res) => {
 })
 
 
-//GENERATE AIRPLANE THET DROPS LIVES, 
+//GENERATE AIRPLANE THET DROPS LIVES, RECURSIVE FUNCTION
 let airplanes = []
 let lives = []
 let planesEnabled = true
@@ -196,12 +196,12 @@ const tick = (delta) => {
                 const life = {
                     id: Math.random() * 10000,
                     x: plane.x,
-                    y: plane.y -10,
+                    y: plane.y + 10,
 
                 }
                 lives.push(life)
                 setTimeout(()=> {
-                    const updatedLives = lives.filter(item => item.id === life.id)
+                    const updatedLives = lives.filter(item => item.id !== life.id)
                     
                     lives = updatedLives
 
@@ -260,7 +260,13 @@ async function main() {
         socket.on('inputs', (inputs) => {
 
             // check if the player was hit
-            const isDead = players.filter(player => player.id == socket.id)[0].dead
+            let isDead 
+            if(players.includes(socket.id)){
+                isDead = players.filter(player => player.id == socket.id)[0].dead
+            }else{
+                isDead = false
+            }
+           
             console.log('isDead', isDead)
             if (!isDead) {
                 inputsMaps[socket.id] = inputs

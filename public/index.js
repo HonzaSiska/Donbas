@@ -167,6 +167,12 @@ const socket = io('ws://localhost:5000', {
     transports: ['websocket', 'polling', 'flashsocket']
 })
 
+//PRODUCTION
+
+// const socket = io('ws://localhost:5000', {
+//     transports: ['websocket', 'polling', 'flashsocket']
+// })
+
 socket.on('connect', () => {
 
 })
