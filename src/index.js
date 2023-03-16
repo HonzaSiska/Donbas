@@ -165,6 +165,7 @@ const tick = (delta) => {
         }
     }
 
+
     // REMOVES DEAD PLAYER FROM THE GAME AFTER 5 SECS
 
     const updatedPlayers = players.filter(player => player.canBeRemoved !== true)
@@ -251,6 +252,7 @@ async function main() {
                 lives: 5,
                 justHit: false,
                 canBeRemoved: false,
+                name:''
             })
         }
         socket.emit('map', {
@@ -299,6 +301,24 @@ async function main() {
         socket.on('disableExplosion', (hitPlayer) => {
             const player = players.find(player => player.id === hitPlayer.playerId)
             player.canExplode = false
+        })
+
+        socket.on('newUser', (user)=> {
+            const currentUser = players.find(player => player.id === socket.id)
+            currentUser.name = user
+            console.log('user', currentUser)
+            io.sockets.emit('newJoin', {
+                currentUser
+            })
+        })
+
+        socket.on('newMessage', (message) => {
+            console.log('message',message)
+            const currentUser = players.find(player => player.id === socket.id)
+            io.sockets.emit('newMessageServer', {
+                message,
+               currentUser
+            })
         })
 
         socket.on('disconnect', () => {
