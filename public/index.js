@@ -3,7 +3,6 @@ import TileMap from './TileMap.js'
 
 const canvas = document.querySelector('#game')
 
-
 const cannonSound = new Audio('./cannon.mp3')
 const explosion = new Audio('./explosion.wav')
 
@@ -64,9 +63,43 @@ switchButton.addEventListener('click', (e) => {
 
 })
 
-// switchButton.click()
 
 
+// CHAT
+let hasJoinedChat = false
+
+const joinBtn = document.querySelector('#join-btn')
+const joinInput = document.querySelector('#username-input')
+const sendBtn = document.querySelector('#message-btn')
+const chat = document.querySelector('#chat')
+const messageInput = document.querySelector('#message-input')
+joinBtn.addEventListener('click', () => {
+    if (joinInput.value !== '') {
+        socket.user = joinInput
+        hasJoinedChat = true
+        socket.emit('newUser', joinInput.value)
+        // alert(joinInput.value)
+    }
+})
+
+sendBtn.addEventListener('click', () => {
+    if (messageInput.value !== '') {
+
+        socket.emit('newMessage', messageInput.value)
+        messageInput.value = ''
+        // alert(joinInput.value)
+    }
+})
+
+messageInput.addEventListener('keydown', (e)=> {
+    if(e.key === 'Enter'){
+        if (messageInput.value !== '') {
+            socket.emit('newMessage', messageInput.value)
+            messageInput.value =''
+            // alert(joinInput.value)
+        }
+    }
+})
 
 
 // MAP
@@ -104,13 +137,13 @@ smokeImage.src = '/smoke.png'
 let airplanes = []
 
 // LIVES
- 
-let lives  = []
+
+let lives = []
 const lifeImage = new Image()
 lifeImage.src = '/first-aid2.png'
 
 window.addEventListener('keydown', (e) => {
-    e.preventDefault()
+    // e.preventDefault()
 
     if (e.key === 'ArrowDown') inputs['down'] = true
     if (e.key === 'ArrowUp') inputs['up'] = true
@@ -122,7 +155,7 @@ window.addEventListener('keydown', (e) => {
 })
 
 window.addEventListener('keyup', (e) => {
-    e.preventDefault()
+    //e.preventDefault()
     if (e.key === 'ArrowDown') inputs['down'] = false
     if (e.key === 'ArrowUp') inputs['up'] = false
     if (e.key === 'ArrowLeft') inputs['left'] = false
@@ -155,20 +188,22 @@ window.addEventListener('click', (e) => {
 
 //POINTER
 
-const pointer = document.querySelector('#pointer') 
+const pointer = document.querySelector('#pointer')
 
-window.addEventListener('mousemove', (e)=> {
+window.addEventListener('mousemove', (e) => {
     pointer.style.left = e.clientX - pointer.width / 2 + 'px'
-    pointer.style.top = (e.clientY - pointer.width / 2)+ 50 + 'px'
+    pointer.style.top = (e.clientY - pointer.width / 2) + 50 + 'px'
 
 })
+
+//PRODUCTION SOCKET.IO URL
 
 const socket = io('https://donbas.onrender.com', {
     transports: ['websocket', 'polling', 'flashsocket']
 })
 
-//PRODUCTION
 
+// DEVELOPMENT SOCKET.IO URL
 // const socket = io('ws://localhost:5000', {
 //     transports: ['websocket', 'polling', 'flashsocket']
 // })
@@ -200,12 +235,39 @@ socket.on('lives', (serverLives) => {
 socket.on('pickup_sound', () => {
     const pickupSound = new Audio('./pickup2.wav')
     pickupSound.play()
-    
+
 })
 
+socket.on('newJoin', (data) => {
+    
+    const chatWrapper = document.querySelector('#chat-wrapper')
+    const joinWrapper = document.querySelector('#join-wrapper')
+    const name = data.currentUser.id === socket.id ? 'You' : data.currentUser.name
+    chat.innerHTML = chat.innerHTML + `<span class='joinin-message'><strong>${name}</strong> just joined in !!</span>`
+    chat.scrollTop = chat.scrollHeight
+    if(hasJoinedChat) chatWrapper.style.display ='block'
+    if(hasJoinedChat) joinWrapper.style.display = 'none'
 
 
+})
 
+socket.on('newMessageServer', (data) => {
+    const position = data.currentUser.id === socket.id  ? 'end' : 'start'
+    const color = data.currentUser.id === socket.id  ? '#80bfff' : '#fce0c5'
+    chat.innerHTML = chat.innerHTML + `<div style='justify-content:${position};' class='new-message-wrapper ${position}'><div style='background: ${color}' class='new-message'>
+        <div class='message-header'>
+            <span><strong>${data.currentUser.name}</strong></span></span>
+        </div>
+        <div class='message-body'>
+            <span>${data.message}</span>
+        </div>
+        
+        </div></div>`
+    chat.scrollTop = chat.scrollHeight
+    const pickupSound = new Audio('./pickup2.wav')
+    pickupSound.playbackRate = 6
+    pickupSound.play()
+})
 
 function loop() {
 
@@ -274,11 +336,11 @@ function loop() {
         //WHEN PLAY HAS 0 LIVES, DRAW FIRE IMAGE
         if (player.dead) {
             ctx.drawImage(fireImage, player.x, player.y, 40, 40)
-            if (!musicPlaying) {
-                draconusAudio.play()
-                switchButton.innerText = 'Music On'
-                musicPlaying = !musicPlaying
-            }
+            // if (!musicPlaying) {
+            //     draconusAudio.play()
+            //     switchButton.innerText = 'Music On'
+            //     musicPlaying = !musicPlaying
+            // }
         }
     }
 
@@ -306,11 +368,10 @@ function loop() {
 
     }
 
-    for(const life of lives){
+    for (const life of lives) {
         // alert(life.x)
-        ctx.drawImage(lifeImage, life.x, life.y,30, 30)
+        ctx.drawImage(lifeImage, life.x, life.y, 30, 30)
     }
-
     window.requestAnimationFrame(loop)
 }
 
