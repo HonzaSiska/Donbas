@@ -198,15 +198,15 @@ window.addEventListener('mousemove', (e) => {
 
 //PRODUCTION SOCKET.IO URL
 
-const socket = io('https://donbas.onrender.com', {
-    transports: ['websocket', 'polling', 'flashsocket']
-})
+// const socket = io('https://donbas.onrender.com', {
+//     transports: ['websocket', 'polling', 'flashsocket']
+// })
 
 
 // DEVELOPMENT SOCKET.IO URL
-// const socket = io('ws://localhost:5000', {
-//     transports: ['websocket', 'polling', 'flashsocket']
-// })
+const socket = io('ws://localhost:5000', {
+    transports: ['websocket', 'polling', 'flashsocket']
+})
 
 socket.on('connect', () => {
 
